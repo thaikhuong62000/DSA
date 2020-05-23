@@ -19,180 +19,111 @@
 using namespace std;
 
 class DSAException {
-	int     _error;
-	string  _text;
+    int     _error;
+    string  _text;
 public:
 
-	DSAException() : _error(0), _text("Success") {}
-	DSAException(int err) : _error(err), _text("Unknown Error") {}
-	DSAException(int err, const char* text) : _error(err), _text(text) {}
+    DSAException() : _error(0), _text("Success") {}
+    DSAException(int err) : _error(err), _text("Unknown Error") {}
+    DSAException(int err, const char* text) : _error(err), _text(text) {}
 
-	int getError() { return _error; }
-	string& getErrorText() { return _text; }
+    int getError() { return _error; }
+    string& getErrorText() { return _text; }
 };
 
 template <class T>
 struct L1Item {
-	T data;
-	L1Item<T>* pNext;
-	L1Item() : pNext(NULL) {}
-	L1Item(T& a) : data(a), pNext(NULL) {}
+	int ID;
+    T data;
+    L1Item<T> *pNext;
+    L1Item() : pNext(NULL), ID(0) {}
+    L1Item(T &a) : data(a), pNext(NULL), ID(0) {}
 };
 
 template <class T>
 class L1List {
-	L1Item<T>* _pHead;// The head pointer of linked list
-	size_t      _size;// number of elements in this list
-	int insertItem(L1Item<T>* pPre, T value);
-	T deleteItem(L1Item<T>* pPre, L1Item<T>* pLoc);
+    L1Item<T>   *_pHead;// The head pointer of linked list
+    size_t       _size; // number of elements in this list
 public:
-	L1List() : _pHead(NULL), _size(0) {}
-	~L1List() { this->clean(); }
-	void    clean();
-	bool    isEmpty() {
-		return _pHead == NULL;
-	}
-	size_t  getSize() {
-		return _size;
-	}
+    L1List() : _pHead(NULL), _size(0) {}
+	~L1List() { clean(); };
 
-	T& at(int i);// give the reference to the element i-th in the list
-	T& operator[](int i);// give the reference to the element i-th in the list
+    void    clean();
+    bool    isEmpty() {
+        return _pHead == NULL;
+    }
+    size_t  getSize() {
+        return _size;
+    }
+	int		getID(int i);
 
-	bool    find(T& a, int& idx);// find an element similar to a in the list. Set the found index to idx, set idx to -1 if failed. Return true if success.
-	int     insert(int i, T& a);// insert an element into the list at location i. Return 0 if success, -1 otherwise
-	int     remove(int i);// remove an element at position i in the list. Return 0 if success, -1 otherwise.
 
-	int     push_back(T& a);// insert to the end of the list
-	int     insertHead(T& a);// insert to the beginning of the list
+    T&      at(int i);				// give the reference to the element i-th in the list
+	T&		atID(int ID);
+    T&      operator[](int i);		// give the reference to the element i-th in the list
 
-	int     removeHead();// remove the beginning element of the list
-	int     removeLast();// remove the last element of the list
+    bool    find(T& a, int& idx);	// find an element similar to a in the list. Set the found index to idx, set idx to -1 if failed. Return true if success.
+	int		findIDX(int ID);
+	int		maxID();
 
-	void    reverse();
+    int     insert(int i, T& a, int ID);	// insert an element into the list at location i. Return 0 if success, -1 otherwise
+    int     remove(int i);			// remove an element at position i in the list. Return 0 if success, -1 otherwise.
+	int		insertItem(L1Item<T>* pPre, T& value, int ID);
+	int		deleteItem(L1Item<T>* pPre, L1Item<T>* pLoc);
 
-	void    traverse(void (*op)(T&)) {
+    int     push_back(T& a, int ID);		// insert to the end of the list
+    int     insertHead(T& a, int ID);		// insert to the beginning of the list
 
-	}
-	void    traverse(void (*op)(T&, void*), void* pParam) {
-		// TODO: Your code goes here
-	}
+    int     removeHead();			// remove the beginning element of the list
+    int     removeLast();			// remove the last element of the list
 
-	void p2C();
-};
+    void    reverse();
 
-/// Insert item to the end of the list
-/// Return 0 if success, -1 otherwise
-template <class T>
-int L1List<T>::push_back(T& a) {
-	// TODO: Your code goes here
-	L1Item<T>* pPre = new L1Item<T>();
-	L1Item<T>* pLoc = new L1Item<T>();
-	pPre = this->_pHead;
-	if (pPre != NULL)
-	{
-		pLoc = pPre->pNext;
+    void    traverse(void (*op)(L1Item<T>*&)) {
+        // TODO: Your code goes here
+		L1Item<T>* pLoc = _pHead;
 		while (pLoc != NULL)
 		{
-			pPre = pPre->pNext;
-			pLoc = pLoc->pNext;
+			op(pLoc);
+			if (pLoc != NULL)
+			{
+				pLoc = pLoc->pNext;
+			}
 		}
-		insertItem(pPre, a);
-	}
-	else insertHead(a);
-	return 0;
-}
-
-/// Insert item to the front of the list
-/// Return 0 if success, -1 otherwise
-template <class T>
-int L1List<T>::insertHead(T& a) {
-	return insertItem(nullptr, a);
-}
-
-/// Remove the first item of the list
-/// Return 0 if success, -1 otherwise
-template <class T>
-int L1List<T>::removeHead() {
-	deleteItem(nullptr, this->_pHead);
-	return 0;
-}
-
-/// Remove the last item of the list
-/// Return 0 if success, -1 otherwise
-template <class T>
-int L1List<T>::removeLast() {
-	L1Item<T>* pPre = new L1Item<T>();
-	L1Item<T>* pLoc = new L1Item<T>();
-	if (this->_pHead != NULL)
-	{
-		pPre = this->_pHead;
-		pLoc = pPre->pNext;
-		while (pLoc->pNext != NULL)
+    }
+    void    traverse(void (*op)(L1Item<T>*&, void*), void* pParam) {
+        // TODO: Your code goes here
+		L1Item<T>* pLoc = _pHead;
+		while (pLoc != NULL)
 		{
-			pPre = pLoc;
-			pLoc = pLoc->pNext;
+			op(pLoc, pParam);
+			if (pLoc != NULL)
+			{
+				pLoc = pLoc->pNext;
+			}
 		}
-		deleteItem(pPre, pLoc);
-	}
-	return 0;
-}
-template <class T> int L1List<T>::insertItem(L1Item<T>* pPre, T value)
-{
-	L1Item<T>* pNew = new L1Item<T>();
-	if (pNew == NULL)
-	{
-		return -1;
-	}
-	pNew->data = value;
-	if (pPre == NULL)
-	{
-		pNew->pNext = this->_pHead;
-		this->_pHead = pNew;
-	}
-	else
-	{
-		pNew->pNext = pPre->pNext;
-		pPre->pNext = pNew;
-	}
-	this->_size++;
-	return 0;
-}
-template <class T> T L1List<T>::deleteItem(L1Item<T>* pPre, L1Item<T>* pLoc)
-{
-	T result = pLoc->data;
-	if (pPre == NULL)
-	{
-		this->_pHead = pLoc->pNext;
-	}
-	else
-	{
-		pPre->pNext = pLoc->pNext;
-	}
-	this->_size--;
-	delete pLoc;
-	return result;
-}
+    }
+};
+
 template <class T> void L1List<T>::clean()
 {
 	if (this->_pHead != NULL)
 	{
-		L1Item<T>* pDel = new L1Item<T>();
 		while (this->_pHead != NULL)
 		{
-			delete pDel;
-			pDel = this->_pHead;
+			L1Item<T>* pDel = this->_pHead;
 			this->_pHead = this->_pHead->pNext;
+			delete pDel;
 		}
-		delete pDel;
+		this->_size = 0;
 	}
-	this->_size = 0;
 }
+
 template <class T> T& L1List<T>::at(int i)
 {
 	if (i >= _size || i < 0)
 	{
-		throw(DSAException(5));
+		throw DSAException(-1);
 	}
 	else if (i == 0)
 	{
@@ -200,8 +131,7 @@ template <class T> T& L1List<T>::at(int i)
 	}
 	else
 	{
-		L1Item<T>* pLoc = new L1Item<T>();
-		pLoc = this->_pHead;
+		L1Item<T>* pLoc = this->_pHead->pNext;
 		for (int j = 1; j < i; j++)
 		{
 			pLoc = pLoc->pNext;
@@ -209,40 +139,111 @@ template <class T> T& L1List<T>::at(int i)
 		return pLoc->data;
 	}
 }
+template <class T> int L1List<T>::getID(int i)
+{
+	if (i >= _size || i < 0)
+	{
+		return -1;
+	}
+	else if (i == 0)
+	{
+		return _pHead->ID;
+	}
+	else
+	{
+		L1Item<T>* pLoc = this->_pHead->pNext;
+		for (int j = 1; j < i; j++)
+		{
+			pLoc = pLoc->pNext;
+		}
+		return pLoc->ID;
+	}
+}
+template <class T> T& L1List<T>::atID(int i)
+{
+	L1Item<T>* pLoc = this->_pHead;
+	while (pLoc != NULL)
+	{
+		if (pLoc->ID == i)
+		{
+			return pLoc->data;
+		}
+		pLoc = pLoc->pNext;
+	}
+	throw DSAException(-1);
+}
+
+
 template <class T> T& L1List<T>::operator[](int i)
 {
-
-
-
+	if (i >= _size || i < 0)
+	{
+		throw DSAException(-1);
+	}
+	else if (i == 0)
+	{
+		return _pHead->data;
+	}
+	else
+	{
+		L1Item<T>* pLoc = this->_pHead->pNext;
+		for (int j = 1; j < i; j++)
+		{
+			pLoc = pLoc->pNext;
+		}
+		return pLoc->data;
+	}
 }
+
 template <class T> bool L1List<T>::find(T& a, int& idx)
 {
 
 	int temp = 0;
-	L1Item<T>* pLoc = new L1Item<T>();
-	pLoc = this->_pHead;
+	L1Item<T>* pLoc = this->_pHead;
 	while (pLoc->data != a)
 	{
 		pLoc = pLoc->pNext;
 		temp++;
 		if (pLoc == NULL)
 		{
-			break;
+			idx = -1;
+			return 0;
 		}
 	}
-	if (pLoc != NULL)
-	{
-		a = pLoc->data;
-		idx = temp;
-	}
-	else
-	{
-		idx = -1;
-	}
-	delete pLoc;
+	idx = temp;
 	return 1;
 }
-template <class T> int L1List<T>::insert(int i, T& a)
+template <class T> int L1List<T>::findIDX(int id)
+{
+	int temp = 0;
+	L1Item<T>* pLoc = this->_pHead;
+	while (pLoc->ID != id)
+	{
+		pLoc = pLoc->pNext;
+		temp++;
+		if (pLoc == NULL)
+		{
+			return -1;
+		}
+	}
+	return temp;
+}
+template <class T> int L1List<T>::maxID()
+{
+	int max = 0;
+	L1Item<T>* pLoc = this->_pHead;
+	while (pLoc != NULL)
+	{
+		if (pLoc->ID > max)
+		{
+			max = pLoc->ID;
+		}
+		pLoc = pLoc->pNext;
+	}
+	return max;
+}
+
+template <class T> int L1List<T>::insert(int i, T& a, int ID)
 {
 	if (i < 0 || i >= _size)
 	{
@@ -250,17 +251,16 @@ template <class T> int L1List<T>::insert(int i, T& a)
 	}
 	else if (i == 0)
 	{
-		insertHead(a);
+		return insertHead(a, ID);
 	}
 	else
 	{
-		L1Item<T>* pPre = new L1Item<T>();
-		pPre = this->_pHead;
+		L1Item<T>* pPre = this->_pHead;
 		for (int j = 1; j < i; j++)
 		{
 			pPre = pPre->pNext;
 		}
-		return insertItem(pPre, a);
+		return insertItem(pPre, a, ID);
 	}
 }
 template <class T> int L1List<T>::remove(int i)
@@ -275,18 +275,101 @@ template <class T> int L1List<T>::remove(int i)
 	}
 	else
 	{
-		L1Item<T>* pPre = new L1Item<T>();
-		pPre = this->_pHead;
+		L1Item<T>* pPre = this->_pHead;
 		for (int j = 1; j < i; j++)
 		{
 			pPre = pPre->pNext;
 		}
-		deleteItem(pPre, pPre->pNext);
+		return deleteItem(pPre, pPre->pNext);
 		return 0;
 	}
 }
+
+template <class T> int L1List<T>::insertItem(L1Item<T>* pPre, T &value, int ID)
+{
+	L1Item<T>* pNew = new L1Item<T>();
+	if (pNew == NULL)
+	{
+		return -1;
+	}
+	pNew->data = value;
+	pNew->ID = ID;
+	if (pPre == NULL)
+	{
+		pNew->pNext = this->_pHead;
+		this->_pHead = pNew;
+	}
+	else
+	{
+		pNew->pNext = pPre->pNext;
+		pPre->pNext = pNew;
+	}
+	this->_size++;
+	return 0;
+}
+template <class T> int L1List<T>::deleteItem(L1Item<T>* pPre, L1Item<T>* pLoc)
+{
+	if (pLoc == NULL)
+	{
+		return -1;
+	}
+	if (pPre == NULL)
+	{
+		this->_pHead = pLoc->pNext;
+	}
+	else
+	{
+		pPre->pNext = pLoc->pNext;
+	}
+	this->_size--;
+	delete pLoc;
+	return 0;
+}
+
+template <class T> int L1List<T>::push_back(T& a, int ID)
+{
+	if (this->_pHead != NULL)
+	{
+		L1Item<T>* pPre = this->_pHead;
+		L1Item<T>* pLoc = pPre->pNext;
+		while (pLoc != NULL)
+		{
+			pPre = pPre->pNext;
+			pLoc = pLoc->pNext;
+		}
+		return insertItem(pPre, a, ID);
+	}
+	else return insertItem(nullptr, a, ID);
+}
+template <class T> int L1List<T>::insertHead(T &a, int ID) {
+    // TODO: Your code goes here
+	return insertItem(nullptr, a, ID);
+}
+
+template <class T> int L1List<T>::removeHead() {
+	return deleteItem(nullptr, this->_pHead);
+}
+template <class T> int L1List<T>::removeLast() {
+	if (this->_pHead != NULL)
+	{
+		L1Item<T>* pPre = this->_pHead;
+		L1Item<T>* pLoc = pPre->pNext;
+		while (pLoc->pNext != NULL)
+		{
+			pPre = pLoc;
+			pLoc = pLoc->pNext;
+		}
+		return deleteItem(pPre, pLoc);
+	}
+	else return -1;
+}
+
 template <class T> void L1List<T>::reverse()
 {
+	if (this == NULL)
+	{
+		return;
+	}
 	L1Item<T>* p1 = new L1Item<T>();
 	L1Item<T>* p2 = new L1Item<T>();
 	L1Item<T>* p3 = new L1Item<T>();
@@ -330,20 +413,5 @@ template <class T> void L1List<T>::reverse()
 			}
 		}
 	}
-}
-template <class T> void L1List<T>::p2C()
-{
-	L1Item<T>* pLoc = new L1Item<T>();
-	int temp = 0;
-	pLoc = this->_pHead;
-	cout << '\n';
-	while (pLoc != NULL)
-	{
-		cout << "Index:  " << temp << '\t' << "Value: " << pLoc->data << '\n';
-		++temp;
-		pLoc = pLoc->pNext;
-	}
-	cout <<  '\t' << _size << '\t' << _pHead;
-	delete pLoc;
 }
 #endif //DSA191_A1_DSALIB_H
